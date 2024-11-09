@@ -1,3 +1,4 @@
+#include "TrigFunction.h"
 #include <cmath>
 
 double TrigFunction::FuncA(double x, int n) {
