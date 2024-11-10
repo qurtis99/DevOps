@@ -1,4 +1,4 @@
-name: Build and Compile
+name: Build and Package
 
 on: [push, pull_request]
 
@@ -7,27 +7,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the repository
       - uses: actions/checkout@v3
 
-      # Step 2: Set up the C++ environment
-      - name: Set up C++ environment
-        run: sudo apt update && sudo apt install -y build-essential automake
+      - name: Set up C++ and Debian package environment
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential automake dpkg-dev debhelper
 
-      # Step 3: Configure and Build
       - name: Configure and Build
         run: |
           autoreconf --install
           ./configure
           make
 
-      # Step 4: Create a tarball distribution
-      - name: Create tarball
-        run: make dist
+      - name: Package as Debian (.deb)
+        run: |
+          make dist
+          mkdir -p debian/usr/local/bin
+          cp my_program debian/usr/local/bin/
+          dpkg-deb --build debian my_program.deb
 
-      # Step 5: Upload tarball as an artifact
-      - name: Upload tarball
+      - name: Upload Debian Package
         uses: actions/upload-artifact@v3
         with:
-          name: my_program-dist
-          path: '*.tar.gz'
+          name: my_program
+          path: my_program.deb
