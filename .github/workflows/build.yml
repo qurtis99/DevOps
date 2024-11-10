@@ -7,8 +7,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      # Step 1: Checkout the repository
+      - uses: actions/checkout@v3
+
+      # Step 2: Set up the C++ environment
       - name: Set up C++ environment
-        run: sudo apt update && sudo apt install -y build-essential
-      - name: Build with Makefile
-        run: make
+        run: sudo apt update && sudo apt install -y build-essential automake
+
+      # Step 3: Configure and Build
+      - name: Configure and Build
+        run: |
+          autoreconf --install
+          ./configure
+          make
+
+      # Step 4: Create a tarball distribution
+      - name: Create tarball
+        run: make dist
+
+      # Step 5: Upload tarball as an artifact
+      - name: Upload tarball
+        uses: actions/upload-artifact@v3
+        with:
+          name: my_program-dist
+          path: '*.tar.gz'
