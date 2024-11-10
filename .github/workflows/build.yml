@@ -7,8 +7,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up C++ environment
-        run: sudo apt update && sudo apt install -y build-essential
-      - name: Build with Makefile
-        run: make
+      - name: Check out repository
+        uses: actions/checkout@v2
+      
+      - name: Set up build environment
+        run: sudo apt update && sudo apt install -y build-essential automake
+
+      - name: Configure and Build
+        run: |
+          autoreconf --install
+          ./configure
+          make
+      
+      - name: Create tarball
+        run: make dist
+      
+      - name: Upload tarball
+        uses: actions/upload-artifact@v2
+        with:
+          name: my_program_tarball
+          path: ./*.tar.gz
+
