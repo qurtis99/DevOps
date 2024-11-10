@@ -27,5 +27,5 @@ jobs:
       - name: Upload Debian Package
         uses: actions/upload-artifact@v3
         with:
-          name: my_program
-          path: my_program.deb
+          name: myprogram
+          path: '*.deb
