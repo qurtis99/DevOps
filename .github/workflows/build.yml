@@ -23,8 +23,10 @@ jobs:
       - name: Package as Debian (.deb)
         run: |
           make dist
+          mkdir -p debian/DEBIAN
           mkdir -p debian/usr/local/bin
           cp my_program debian/usr/local/bin/
+          cp debian/control debian/DEBIAN/control
           dpkg-deb --build debian my_program.deb
 
       - name: Upload Debian Package
