@@ -20,14 +20,10 @@ jobs:
           ./configure
           make
 
-      - name: Package as Debian (.deb)
+      - name: Create Debian package
         run: |
-          make dist
-          mkdir -p debian/DEBIAN
-          mkdir -p debian/usr/local/bin
-          cp my_program debian/usr/local/bin/
-          cp debian/control debian/DEBIAN/control
-          dpkg-deb --build debian my_program.deb
+          dh_make --createorig -y -p my-program_1.0
+          dpkg-deb --build debian
 
       - name: Upload Debian Package
         uses: actions/upload-artifact@v3
