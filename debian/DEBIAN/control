@@ -1,10 +1,5 @@
-Source: my-program
-Section: misc
-Priority: optional
-Maintainer: Your Name <kokhanevych.dmytro@lll.kpi.ua>
-Standards-Version: 4.1.1
-
-Package: my-program
-Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: My Program - a description of what it does
+Package: myprogram
+Version: 0.1
+Architecture: all
+Maintainer: kokhanevych.dmytro@lll.kpi.ua
+Description: I really do not uderstand(.
