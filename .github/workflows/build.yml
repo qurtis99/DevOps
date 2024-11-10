@@ -9,11 +9,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Set up C++ environment
-        run: sudo apt update && sudo apt install -y build-essential automake
-      - name: Configure and Build
-        run: |
-          autoreconf --install
-          ./configure
-          make
-      - name: Create tarball
-        run: make dist
+        run: sudo apt update && sudo apt install -y build-essential
+      - name: Build with Makefile
+        run: make
