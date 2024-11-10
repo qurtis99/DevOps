@@ -22,7 +22,6 @@ jobs:
 
       - name: Create Debian package
         run: |
-          dh_make --createorig -y -p my-program_1.0
           dpkg-deb --build debian
 
       - name: Upload Debian Package
