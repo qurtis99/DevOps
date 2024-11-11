@@ -1,0 +1,23 @@
+name: Build, Package, and Test
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up C++ and Debian package environment
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential automake dpkg-dev debhelper
+
+      - name: Configure, Build, and Test
+        run: |
+          autoreconf --install
+          ./configure
+          make
+          make check # Add this to run tests
+
