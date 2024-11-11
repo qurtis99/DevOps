@@ -1,16 +1,15 @@
-#include "../src/TrigFunction.h"
-#include <iostream>
+#include "./src/TrigFunction.h"
 #include <cassert>
 
 int main() {
-    double test_values[] = {0.0, 0.5, 1.0}; // Example values to test
-    int n = 10; // Example series term count
+    TrigFunction trigFunc;  // Create an instance of TrigFunction
+    double test_values[] = {0.5, 1.0, 1.5};
+    int n = 10;
 
-    // Perform tests
-    assert(TrigFunction::FuncA(test_values[0], n) == /* expected result */);
-    assert(TrigFunction::FuncA(test_values[1], n) == /* expected result */);
-    assert(TrigFunction::FuncA(test_values[2], n) == /* expected result */);
+    // Add test cases and expected results
+    assert(trigFunc.FuncA(test_values[0], n) == 1);  // Replac
+    assert(trigFunc.FuncA(test_values[1], n) == 2);  // Replace with actual expected value
+    assert(trigFunc.FuncA(test_values[2], n) == 3);  // Replace with actual expected value
 
-    std::cout << "All tests passed successfully!" << std::endl;
     return 0;
 }

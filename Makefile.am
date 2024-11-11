@@ -1,4 +1,3 @@
-AUTOMAKE_OPTIONS = subdir-objects
-
-bin_PROGRAMS = my_program
-my_program_SOURCES = src/main.cpp src/TrigFunction.cpp src/TrigFunction.h
+# Add this section to compile test.cpp
+check_PROGRAMS = test_program
+test_program_SOURCES = tests/test.cpp src/TrigFunction.cpp
