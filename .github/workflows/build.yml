@@ -21,3 +21,6 @@ jobs:
           make
           make check # Add this to run tests
 
+      - name: Run Tests
+        run: ./tests/test
+
