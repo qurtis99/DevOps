@@ -1,4 +1,4 @@
-name: Build and Package
+name: Build, Package, and Test
 
 on: [push, pull_request]
 
@@ -14,18 +14,10 @@ jobs:
           sudo apt update
           sudo apt install -y build-essential automake dpkg-dev debhelper
 
-      - name: Configure and Build
+      - name: Configure, Build, and Test
         run: |
           autoreconf --install
           ./configure
           make
+          make check # Add this to run tests
 
-      - name: Create Debian package
-        run: |
-          dpkg-deb --build debian
-
-      - name: Upload Debian Package
-        uses: actions/upload-artifact@v3
-        with:
-          name: myprogram
-          path: debian.deb
