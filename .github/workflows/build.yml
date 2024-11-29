@@ -1,12 +1,10 @@
-name: Build and Test
-
 on:
   push:
     branches:
-      - main
+      - branchHTTPserver
   pull_request:
     branches:
-      - main
+      - branchHTTPserver
 
 jobs:
   build:
