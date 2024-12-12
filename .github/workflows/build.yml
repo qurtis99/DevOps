@@ -8,6 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     strategy:
       matrix:
         arch: [amd64, arm64]
@@ -27,16 +28,15 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v2
-      with:
-        context: .
-        push: true
-        tags: qurtis99/http-server:latest-${{ matrix.arch }}
-        platforms: linux/${{ matrix.arch }}
-        cache-from: type=registry,ref=qurtis99/http-server:cache
-        cache-to: type=inline
 
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v4
+      with: 
+        context: .
+        platforms: linux/amd64,linux/arm64
+        push: true
+        tags: qurtis99/http-server:latest
+ 
     - name: Create and push multi-architecture manifest
       run: |
         docker manifest create qurtis99/http-server:latest \
