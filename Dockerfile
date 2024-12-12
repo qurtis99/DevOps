@@ -21,20 +21,20 @@ WORKDIR /build/DevOps
 RUN autoreconf --install && ./configure && make
 
 # Перевірка наявності зібраного бінарного файлу
-RUN test -f /build/DevOps/branchHTTPserver || (echo "Binary not found!" && exit 1)
+RUN test -f /build/DevOps/HTTP_Server || (echo "Binary not found!" && exit 1)
 
 # Етап 2: Запуск
 FROM alpine:latest
 WORKDIR /app
 
 # Копіюємо виконуваний файл з етапу збірки
-COPY --from=builder /build/DevOps/branchHTTPserver /usr/local/bin/branchHTTPserver
+COPY --from=builder /build/DevOps/HTTP_Server /usr/local/bin/HTTP_Server
 
 # Встановлюємо права на виконання
-RUN chmod +x /usr/local/bin/branchHTTPserver
+RUN chmod +x /usr/local/bin/HTTP_Server
 
 # Встановлюємо порт
 EXPOSE 8081
 
 # Запускаємо сервер
-ENTRYPOINT ["/usr/local/bin/branchHTTPserver"]
+ENTRYPOINT ["/usr/local/bin/HTTP_Server"]
