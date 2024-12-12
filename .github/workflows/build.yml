@@ -14,39 +14,37 @@ jobs:
         architecture: [amd64, arm64]
 
     steps:
-      # Завантаження репозиторію
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Налаштування QEMU для підтримки багатоплатформеного білда
       - name: Set up QEMU for multi-architecture
         uses: docker/setup-qemu-action@v3
 
-      # Налаштування Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      # Увійти в Docker Hub
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # Побудова та пуш Docker-образів для обох архітектур
       - name: Build and push Docker image
         run: |
           docker buildx build \
             --platform=linux/${{ matrix.architecture }} \
             --push \
-            -t ${{ secrets.DOCKER_USERNAME }}/http_server:${{ matrix.architecture }} .
+            -t ${{ secrets.DOCKER_USERNAME }}/http_server:${{ matrix.architecture }} . || exit 1
 
-      # Створення та пуш багатоплатформенного маніфесту
+      - name: Verify image exists
+        run: |
+          docker pull ${{ secrets.DOCKER_USERNAME }}/http_server:${{ matrix.architecture }} || echo "Image not found for ${{ matrix.architecture }}"
+
       - name: Create and push multi-architecture manifest
         if: always()
         run: |
           docker manifest create ${{ secrets.DOCKER_USERNAME }}/http_server:latest \
             --amend ${{ secrets.DOCKER_USERNAME }}/http_server:amd64 \
-            --amend ${{ secrets.DOCKER_USERNAME }}/http_server:arm64
+            --amend ${{ secrets.DOCKER_USERNAME }}/http_server:arm64 || exit 1
           docker manifest push ${{ secrets.DOCKER_USERNAME }}/http_server:latest
 
