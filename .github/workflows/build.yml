@@ -40,7 +40,7 @@ jobs:
     - name: Wait for images to be fully pushed
       run: sleep 30
 
-q    # Перевірка наявності образів
+    # Перевірка наявності образів
     - name: Verify amd64 image is available
       run: |
         docker pull qurtis99/http-server:amd64 || echo "amd64 image not found"
