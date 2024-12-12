@@ -29,13 +29,14 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
 
 
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v4
-      with: 
+ - name: Build and push Docker images
+      uses: docker/build-push-action@v2
+      with:
         context: .
-        platforms: linux/amd64,linux/arm64
         push: true
-        tags: qurtis99/http-server:latest
+        tags: |
+          qurtis99/http-server:latest-${{ matrix.arch }}
+        platforms: linux/amd64,linux/arm64
  
     - name: Create and push multi-architecture manifest
       run: |
