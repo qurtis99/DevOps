@@ -8,38 +8,30 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 60 # Збільшуємо таймаут до 60 хвилин
     strategy:
       matrix:
         arch: [amd64, arm64]
     steps:
-    - name: Checkout repository
+    - name: Checkout repository # Завантаження репозиторію
       uses: actions/checkout@v2
 
-    - name: Set up QEMU
+    - name: Set up QEMU # Налаштування QEMU для емуляції архітектур
       uses: docker/setup-qemu-action@v2
 
-    - name: Set up Docker Buildx
+    - name: Set up Docker Buildx # Налаштування Docker Buildx для створення багатоплатформенних образів
       uses: docker/setup-buildx-action@v2
 
-    - name: Login to DockerHub
+    - name: Login to DockerHub # Вхід до DockerHub для можливості пушити образи
       uses: docker/login-action@v2
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Build and push Docker images
-      uses: docker/build-push-action@v2
-      with:
+    - name: Build and push Docker image # Створення та пуш Docker образів
+      uses: docker/build-push-action@v4
+      with: 
         context: .
-        push: true
-        tags: |
-          qurtis99/http-server:latest-${{ matrix.arch }}
         platforms: linux/amd64,linux/arm64
- 
-    - name: Create and push multi-architecture manifest
-      run: |
-        docker manifest create qurtis99/http-server:latest \
-          --amend qurtis99/http-server:latest-amd64 \
-          --amend qurtis99/http-server:latest-arm64
-        docker manifest push qurtis99/http-server:latest
+        push: true
+        tags: qurtis99/http-server:latest
