@@ -8,30 +8,51 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 60 # Збільшуємо таймаут до 60 хвилин
+    timeout-minutes: 60
     strategy:
       matrix:
         arch: [amd64, arm64]
     steps:
-    - name: Checkout repository # Завантаження репозиторію
+    - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Set up QEMU # Налаштування QEMU для емуляції архітектур
+    - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
 
-    - name: Set up Docker Buildx # Налаштування Docker Buildx для створення багатоплатформенних образів
+    - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
 
-    - name: Login to DockerHub # Вхід до DockerHub для можливості пушити образи
+    - name: Login to DockerHub
       uses: docker/login-action@v2
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Build and push Docker image # Створення та пуш Docker образів
+    - name: Build and push Docker image
       uses: docker/build-push-action@v4
       with: 
         context: .
         platforms: linux/amd64,linux/arm64
         push: true
         tags: qurtis99/http-server:latest
+
+    # Додати затримку для поширення образів
+    - name: Wait for images to be fully pushed
+      run: sleep 30
+
+q    # Перевірка наявності образів
+    - name: Verify amd64 image is available
+      run: |
+        docker pull qurtis99/http-server:amd64 || echo "amd64 image not found"
+
+    - name: Verify arm64 image is available
+      run: |
+        docker pull qurtis99/http-server:arm64 || echo "arm64 image not found"
+
+    # Створення та пуш маніфесту
+    - name: Create and push multi-architecture manifest
+      run: |
+        docker manifest create qurtis99/http-server:latest \
+          --amend qurtis99/http-server:amd64 \
+          --amend qurtis99/http-server:arm64
+        docker manifest push qurtis99/http-server:latest

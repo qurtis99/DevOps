@@ -11,22 +11,30 @@ RUN apt-get update && apt-get install -y \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /build
-COPY ./src ./src
-COPY ./configure.ac ./configure.ac
-COPY ./Makefile.am ./Makefile.am
-COPY ./tests ./tests
 
+# Клонуємо репозиторій з GitHub
+RUN git clone --branch branchHTTPserver https://github.com/qurtis99/DevOps.git
+
+WORKDIR /build/DevOps
+
+# Конфігурація та збірка
 RUN autoreconf --install && ./configure && make
 
+# Перевірка наявності зібраного бінарного файлу
+RUN test -f /build/DevOps/branchHTTPserver || (echo "Binary not found!" && exit 1)
+
 # Етап 2: Запуск
-FROM ubuntu:latest
+FROM alpine:latest
 WORKDIR /app
 
-# Копіюємо виконуваний файл
-COPY --from=builder /build/HTTP_Server .
+# Копіюємо виконуваний файл з етапу збірки
+COPY --from=builder /build/DevOps/branchHTTPserver /usr/local/bin/branchHTTPserver
+
+# Встановлюємо права на виконання
+RUN chmod +x /usr/local/bin/branchHTTPserver
 
 # Встановлюємо порт
 EXPOSE 8081
 
 # Запускаємо сервер
-CMD ["./HTTP_Server"]
+ENTRYPOINT ["/usr/local/bin/branchHTTPserver"]
