@@ -1,21 +1,32 @@
-# Використовуємо базовий образ з підтримкою C++
-FROM ubuntu:20.04
+# Етап 1: Збірка
+FROM ubuntu:latest as builder
 
-# Оновлюємо систему та встановлюємо необхідні пакети
 RUN apt-get update && apt-get install -y \
     build-essential \
+    automake \
+    autoconf \
+    libtool \
     g++ \
-    && rm -rf /var/lib/apt/lists/*
+    git && \
+    rm -rf /var/lib/apt/lists/*
 
-# Встановлюємо необхідний порт
-EXPOSE 8081
+WORKDIR /build
+COPY ./src ./src
+COPY ./configure.ac ./configure.ac
+COPY ./Makefile.am ./Makefile.am
+COPY ./tests ./tests
 
-# Копіюємо проект у контейнер
+RUN autoreconf --install && ./configure && make
+
+# Етап 2: Запуск
+FROM ubuntu:latest
 WORKDIR /app
-COPY . .
 
-# Збираємо проект
-RUN ./configure && make
+# Копіюємо виконуваний файл
+COPY --from=builder /build/HTTP_Server .
+
+# Встановлюємо порт
+EXPOSE 8081
 
 # Запускаємо сервер
 CMD ["./HTTP_Server"]
