@@ -20,6 +20,12 @@ terminate_container() {
     docker kill "$container_id"
 }
 
+# Отримання навантаження на ЦП для контейнера
+retrieve_cpu_load() {
+    local container_id=$1
+    docker stats --no-stream --format "{{.Name}} {{.CPUPerc}}" | grep "$container_id" | awk '{print $2}' | sed 's/%//'
+}
+
 # Визначення індексу ядра ЦП для контейнера
 get_cpu_core() {
     case $1 in
@@ -30,16 +36,10 @@ get_cpu_core() {
     esac
 }
 
-# Отримання навантаження на ЦП для контейнера
-retrieve_cpu_load() {
-    local container_id=$1
-    docker stats --no-stream --format "{{.Name}} {{.CPUPerc}}" | grep "$container_id" | awk '{print $2}' | sed 's/%//'
-}
-
 # Завантаження нової версії образу Docker, якщо доступна
 check_for_new_image() {
     echo "$(date '+%m-%d %H:%M:%S'): Перевірка наявності нового образу..."
-    if docker pull qurtis99/http-server:latest | grep -q "Завантаження новішого образу"; then
+    if docker pull qurtis99/http-server:latest | grep -q "Downloaded newer image"; then
         echo "$(date '+%m-%d %H:%M:%S'): Новий образ знайдено."
         return 0
     else
@@ -55,7 +55,7 @@ refresh_containers() {
         echo "$(date '+%m-%d %H:%M:%S'): Оновлення $container..."
         terminate_container "$container"
         launch_container "$container" "$(get_cpu_core "$container")"
-        echo "$(date '+%м-%d %H:%M:%S'): $container оновлено."
+        echo "$(date '+%m-%d %H:%M:%S'): $container оновлено."
     done
 }
 
@@ -63,7 +63,6 @@ refresh_containers() {
 manage_containers() {
     local srv1_busy=0
     local srv2_busy=0
-    local srv3_idle=0
 
     while true; do
         if docker ps --format "{{.Names}}" | grep -q "^srv1$"; then
@@ -71,7 +70,7 @@ manage_containers() {
             if (( $(echo "$cpu_srv1 > 47.0" | bc -l) )); then
                 srv1_busy=$((srv1_busy + 1))
                 if (( srv1_busy >= 2 )); then
-                    echo "$(date '+%m-%d %H:%M:%S'): srv1 зайнятий. Запуск srv2..."
+                    echo "$(date '+%Y-%m-%d %H:%M:%S'): srv1 зайнятий. Запуск srv2..."
                     if ! docker ps --format "{{.Names}}" | grep -q "^srv2$"; then
                         launch_container "srv2" 1
                     fi
@@ -88,7 +87,7 @@ manage_containers() {
             if (( $(echo "$cpu_srv2 > 52.0" | bc -l) )); then
                 srv2_busy=$((srv2_busy + 1))
                 if (( srv2_busy >= 2 )); then
-                    echo "$(date '+%m-%d %H:%M:%S'): srv2 зайнятий. Запуск srv3..."
+                    echo "$(date '+%Y-%m-%d %H:%M:%S'): srv2 зайнятий. Запуск srv3..."
                     if ! docker ps --format "{{.Names}}" | grep -q "^srv3$"; then
                         launch_container "srv3" 2
                     fi
@@ -97,22 +96,6 @@ manage_containers() {
                 srv2_busy=0
             fi
         fi
-            for container in srv3; do
-            if docker ps --format "{{.Names}}" | grep -q "^$container$"; then
-                local cpu=$(retrieve_cpu_load "$container")
-                if (( $(echo "$cpu < 1.0" | bc -l) )); then
-                    if [[ "$container" == "srv3" ]]; then
-                        srv3_idle=$((srv3_idle + 1))
-                        if (( srv3_idle >= 2 )); then
-                            echo "$(date '+%м-%d %H:%M:%S'): $container неактивний. Зупинка..."
-                            terminate_container "$container"
-                        fi
-                    fi
-                else
-                    [[ "$container" == "srv3" ]] && srv3_idle=0
-                fi
-            fi
-        done
 
         if check_for_new_image; then
             refresh_containers
@@ -120,5 +103,7 @@ manage_containers() {
         sleep 120
     done
 }
+
+trap "echo 'Завершення скрипту...'; exit 0" SIGINT SIGTERM
 
 manage_containers
