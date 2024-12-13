@@ -100,7 +100,7 @@ manage_containers() {
         if check_for_new_image; then
             refresh_containers
         fi
-        sleep 120
+        sleep 60
     done
 }
 

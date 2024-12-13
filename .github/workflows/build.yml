@@ -36,10 +36,6 @@ jobs:
         push: true
         tags: qurtis99/http-server:latest
 
-    # Додати затримку для поширення образів
-    - name: Wait for images to be fully pushed
-      run: sleep 30
-
     # Перевірка наявності образів
     - name: Verify amd64 image is available
       run: |
