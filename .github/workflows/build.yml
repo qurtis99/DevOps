@@ -48,4 +48,4 @@ jobs:
     - name: Verify arm64 image is available
       run: |
         docker pull qurtis99/http-server:arm64 || echo "arm64 image not found"
-    # Немає маніфестів, але є клонування з гита та 2 арзітектури
+    # дивлюсь як працює скриптА
