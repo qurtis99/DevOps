@@ -1,6 +1,7 @@
-# Етап 1: Збірка
+# Етап 1: збірка
 FROM ubuntu:latest as builder
 
+# Оновлюємо систему та встановлюємо необхідні інструменти
 RUN apt-get update && apt-get install -y \
     build-essential \
     automake \
@@ -10,31 +11,28 @@ RUN apt-get update && apt-get install -y \
     git && \
     rm -rf /var/lib/apt/lists/*
 
+# Копіюємо файли
 WORKDIR /build
-
-# Клонуємо репозиторій з GitHub
-RUN git clone --branch branchHTTPserver https://github.com/qurtis99/DevOps.git
-
-WORKDIR /build/DevOps
+COPY . .
 
 # Конфігурація та збірка
 RUN autoreconf --install && ./configure && make
 
-# Перевірка наявності зібраного бінарного файлу
-RUN test -f /build/DevOps/HTTP_Server || (echo "Binary not found!" && exit 1)
-
-# Етап 2: Запуск
+# Етап 2: створення кінцевого образу
 FROM alpine:latest
 WORKDIR /app
 
-# Копіюємо виконуваний файл з етапу збірки
-COPY --from=builder /build/DevOps/HTTP_Server /usr/local/bin/HTTP_Server
+# Встановлюємо необхідні бібліотеки для сумісності
+RUN apk add --no-cache libc6-compat
 
-# Встановлюємо права на виконання
+# Копіюємо виконуваний файл з етапу збірки
+COPY --from=builder /build/HTTP_Server /usr/local/bin/
+
+# Перевірка прав на виконання
 RUN chmod +x /usr/local/bin/HTTP_Server
 
 # Встановлюємо порт
 EXPOSE 8081
 
 # Запускаємо сервер
-ENTRYPOINT ["/usr/local/bin/HTTP_Server"]
+CMD ["/usr/local/bin/HTTP_Server"]
